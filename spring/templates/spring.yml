@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-kafka-service
+  labels:
+    app: spring-kafka
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: spring-kafka
+    tier: frontend
+  clusterIP: 10.100.113.23
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: spring-kafka
+  labels:
+    app: spring-kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-kafka
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: spring-kafka
+        tier: frontend
+    spec:
+      containers:
+      - image: mawfia/swe645a4-spring:{{ .Values.version | default 1.0 }}
+        name: spring-kafka
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 8080
+          name: spring
